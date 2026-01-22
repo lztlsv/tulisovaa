@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Визуализация алгоритмов: сортировка и обход дерева</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4a6fa5;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #3498db;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            margin: 20px 0 10px 0;
+            font-size: 16px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            align-items: center;
+        }
+        
+        .tree-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        button, select, input {
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        select, input {
+            background-color: #f8f9fa;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .btn-success {
+            background-color: #2ecc71;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-warning {
+            background-color: #f39c12;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d68910;
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .control-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+        
+        .size-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .size-value {
+            min-width: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        input[type="range"] {
+            width: 100px;
+            padding: 0;
+        }
+        
+        .tree-editor, .array-editor {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .editor-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .node-input-group, .array-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .node-input, .array-input {
+            width: 80px;
+            text-align: center;
+            padding: 8px;
+        }
+        
+        .array-input-long {
+            width: 200px;
+            padding: 8px;
+        }
+        
+        .instructions {
+            background-color: #e8f4fc;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+        
+        .instructions ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        
+        .status-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .status-label {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+        
+        .status-value {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .visualization {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            min-height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .array-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 180px;
+            padding: 20px;
+            gap: 8px;
+        }
+        
+        .array-element {
+            min-width: 30px;
+            background-color: #3498db;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px 5px 0 0;
+            font-weight: bold;
+            position: relative;
+            transition: all 0.3s;
+            flex: 1;
+            max-width: 60px;
+        }
+        
+        .array-element.active {
+            background-color: #e74c3c;
+            transform: scale(1.1);
+        }
+        
+        .array-element.compared {
+            background-color: #f39c12;
+        }
+        
+        .array-element.sorted {
+            background-color: #2ecc71;
+        }
+        
+        .array-value {
+            position: absolute;
+            top: -25px;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .array-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .tree-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            min-height: 400px;
+            width: 100%;
+            overflow: auto;
+            border: 1px dashed #ddd;
+            border-radius: 8px;
+            background-color: white;
+        }
+        
+        .tree {
+            position: relative;
+            min-width: 600px;
+            min-height: 400px;
+            margin: 0 auto;
+        }
+        
+        .tree-node {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #3498db;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            position: absolute;
+            z-index: 2;
+            transition: all 0.3s;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .tree-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .tree-node.root {
+            background-color: #9b59b6;
+        }
+        
+        .tree-node.selected {
+            background-color: #e74c3c;
+            transform: scale(1.2);
+            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.4);
+            z-index: 3;
+        }
+        
+        .tree-node.active {
+            background-color: #e74c3c;
+            transform: scale(1.2);
+        }
+        
+        .tree-node.visited {
+            background-color: #2ecc71;
+        }
+        
+        .tree-line {
+            position: absolute;
+            background-color: #7f8c8d;
+            height: 3px;
+            transform-origin: 0 0;
+            z-index: 1;
+        }
+        
+        .info-panel {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 15px;
+            min-height: 80px;
+        }
+        
+        .step-info {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .complexity {
+            margin-top: 15px;
+            font-style: italic;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .code-snippet {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .tree {
+                min-width: 400px;
+            }
+            .array-element {
+                min-width: 25px;
+                max-width: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Визуализация алгоритмов</h1>
+        <p class="subtitle">Интерактивная модель для изучения сортировки массива и обхода дерева</p>
+    </header>
+    
+    <div class="container">
+        <!-- Панель сортировки массива -->
+        <div class="panel">
+            <h2>Сортировка массива (пузырьковая)</h2>
+            
+            <div class="array-editor">
+                <h3>Управление массивом</h3>
+                
+                <div class="editor-controls">
+                    <div class="array-input-group">
+                        <input type="number" id="singleNumber" class="array-input" placeholder="Число" min="1" max="999" value="42">
+                        <button id="addNumber" class="btn-small">Добавить число</button>
+                    </div>
+                    
+                    <div class="array-input-group">
+                        <input type="text" id="multipleNumbers" class="array-input-long" placeholder="Числа через пробел (10 20 30)">
+                        <button id="addMultiple" class="btn-small">Добавить несколько</button>
+                    </div>
+                    
+                    <div class="array-input-group">
+                        <button id="clearArray" class="btn-small btn-danger">Очистить массив</button>
+                        <button id="generateRandom" class="btn-small">Случайный массив</button>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <div class="control-label">РАЗМЕР МАССИВА</div>
+                        <div class="size-control">
+                            <button id="decreaseSize">-</button>
+                            <div class="size-value" id="arraySizeValue">8</div>
+                            <button id="increaseSize">+</button>
+                            <input type="range" id="arraySizeSlider" min="3" max="20" value="8" step="1">
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="control-label">СКОРОСТЬ</div>
+                        <select id="speedSort">
+                            <option value="800">Очень медленно</option>
+                            <option value="500">Медленно</option>
+                            <option value="300" selected>Средне</option>
+                            <option value="100">Быстро</option>
+                            <option value="50">Очень быстро</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="instructions">
+                    <strong>Как заполнить массив:</strong>
+                    <ol>
+                        <li>Введите одно число и нажмите "Добавить число"</li>
+                        <li>Или введите несколько чисел через пробел и нажмите "Добавить несколько"</li>
+                        <li>Или установите размер и нажмите "Случайный массив"</li>
+                        <li>Используйте "Очистить массив" чтобы начать заново</li>
+                    </ol>
+                    <div style="margin-top: 10px;">
+                        <strong>Текущий массив:</strong> [<span id="currentArrayValues"></span>]
+                    </div>
+                </div>
+                
+                <div class="status-panel">
+                    <div class="status-item">
+                        <div class="status-label">РАЗМЕР</div>
+                        <div class="status-value" id="currentSize">0</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">МИНИМУМ</div>
+                        <div class="status-value" id="arrayMin">-</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">МАКСИМУМ</div>
+                        <div class="status-value" id="arrayMax">-</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">СУММА</div>
+                        <div class="status-value" id="arraySum">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="startSort">▶ Запустить сортировку</button>
+                <button id="nextStepSort">⏭ Следующий шаг</button>
+                <button id="resetSort">↻ Сбросить сортировку</button>
+            </div>
+            
+            <div class="visualization">
+                <div id="arrayVisualization" class="array-container">
+                    <!-- Массив будет отрисован здесь -->
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <div id="sortInfo" class="step-info">Введите числа в массив или сгенерируйте случайный</div>
+                <div>Сравнения: <span id="comparisons">0</span>, Перестановки: <span id="swaps">0</span></div>
+                <div class="complexity">Сложность алгоритма: O(n²) в худшем случае, где n = размер массива</div>
+            </div>
+            
+            <div class="code-snippet">
+// Алгоритм пузырьковой сортировки:
+for (i = 0; i < n-1; i++) {
+    for (j = 0; j < n-i-1; j++) {
+        if (array[j] > array[j+1]) {
+            swap(array[j], array[j+1]); // Меняем местами
+        }
+    }
+}
+            </div>
+        </div>
+        
+        <!-- Панель обхода дерева -->
+        <div class="panel">
+            <h2>Обход дерева (в глубину - DFS)</h2>
+            
+            <div class="tree-controls">
+                <div class="tree-editor">
+                    <h3>Конструктор дерева</h3>
+                    
+                    <div class="editor-controls">
+                        <div class="node-input-group">
+                            <input type="number" id="nodeValue" class="node-input" placeholder="Значение" min="1" max="99" value="50">
+                            <button id="addRoot" class="btn-small">Создать корень</button>
+                        </div>
+                        
+                        <div class="node-input-group">
+                            <input type="number" id="childValue" class="node-input" placeholder="Значение" min="1" max="99" value="30">
+                            <button id="addLeftChild" class="btn-small" disabled>Добавить левого</button>
+                            <button id="addRightChild" class="btn-small" disabled>Добавить правого</button>
+                        </div>
+                        
+                        <div class="node-input-group">
+                            <button id="removeNode" class="btn-small btn-danger" disabled>Удалить узел</button>
+                            <button id="clearTree" class="btn-small btn-danger">Очистить все</button>
+                            <button id="randomTree" class="btn-small">Случайное дерево</button>
+                        </div>
+                    </div>
+                    
+                    <div class="instructions">
+                        <strong>Как построить дерево:</strong>
+                        <ol>
+                            <li>Введите значение (1-99) и нажмите "Создать корень"</li>
+                            <li>Кликните на узел, чтобы выбрать его (он станет красным)</li>
+                            <li>Введите значение и нажмите "Добавить левого" или "Добавить правого"</li>
+                            <li>Повторяйте шаги 2-3 для построения любого дерева</li>
+                            <li>Удаляйте узлы кнопкой "Удалить узел"</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="status-panel">
+                        <div class="status-item">
+                            <div class="status-label">ВЫБРАННЫЙ УЗЕЛ</div>
+                            <div class="status-value" id="selectedNodeValue">-</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">ВСЕГО УЗЛОВ</div>
+                            <div class="status-value" id="totalNodes">0</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">ГЛУБИНА</div>
+                            <div class="status-value" id="treeDepth">0</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button id="startTraversal">▶ Запустить обход</button>
+                    <button id="nextStepTraversal">⏭ Следующий шаг</button>
+                    <button id="resetTraversal">↻ Сбросить обход</button>
+                    
+                    <select id="traversalType">
+                        <option value="preorder">Прямой обход (Pre-order)</option>
+                        <option value="inorder">Центральный обход (In-order)</option>
+                        <option value="postorder">Обратный обход (Post-order)</option>
+                    </select>
+                    
+                    <div class="control-group">
+                        <div class="control-label">СКОРОСТЬ ОБХОДА</div>
+                        <select id="speedTraversal">
+                            <option value="1000">Медленно</option>
+                            <option value="600" selected>Средне</option>
+                            <option value="300">Быстро</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="visualization">
+                <div id="treeVisualization" class="tree-container">
+                    <!-- Дерево будет отрисовано здесь -->
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <div id="traversalInfo" class="step-info">Создайте дерево или сгенерируйте случайное</div>
+                <div>Порядок обхода: <span id="traversalOrder" style="font-weight: bold; color: #2c3e50;"></span></div>
+                <div>Посещено узлов: <span id="visitedNodes">0</span> из <span id="totalNodesInfo">0</span></div>
+                <div class="complexity">Сложность алгоритма DFS: O(n) времени и O(h) памяти, где n = узлы, h = высота</div>
+            </div>
+            
+            <div class="code-snippet">
+// Алгоритм обхода дерева в глубину (Pre-order):
+function dfs(node) {
+    if (node == null) return;
+    visit(node);           // Обработать узел
+    dfs(node.left);        // Обойти левое поддерево
+    dfs(node.right);       // Обойти правое поддерево
+}
+
+// In-order: left → node → right
+// Post-order: left → right → node
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ========== МОДЕЛЬ СОРТИРОВКИ МАССИВА ==========
+        let array = [];
+        let arrayState = {
+            sorted: false,
+            currentStep: 0,
+            i: 0,
+            j: 0,
+            comparisons: 0,
+            swaps: 0,
+            totalSteps: 0,
+            isRunning: false,
+            intervalId: null
+        };
+        
+        // Переменная для хранения размера массива
+        let arraySize = 8;
+        
+        // Элементы DOM для массива
+        const arrayVisualization = document.getElementById('arrayVisualization');
+        const sortInfo = document.getElementById('sortInfo');
+        const comparisonsElement = document.getElementById('comparisons');
+        const swapsElement = document.getElementById('swaps');
+        const currentSizeElement = document.getElementById('currentSize');
+        const arraySizeValue = document.getElementById('arraySizeValue');
+        const arraySizeSlider = document.getElementById('arraySizeSlider');
+        const currentArrayValues = document.getElementById('currentArrayValues');
+        const arrayMinElement = document.getElementById('arrayMin');
+        const arrayMaxElement = document.getElementById('arrayMax');
+        const arraySumElement = document.getElementById('arraySum');
+        
+        // Элементы управления массивом
+        const singleNumberInput = document.getElementById('singleNumber');
+        const multipleNumbersInput = document.getElementById('multipleNumbers');
+        const addNumberBtn = document.getElementById('addNumber');
+        const addMultipleBtn = document.getElementById('addMultiple');
+        const clearArrayBtn = document.getElementById('clearArray');
+        const generateRandomBtn = document.getElementById('generateRandom');
+        const decreaseSizeBtn = document.getElementById('decreaseSize');
+        const increaseSizeBtn = document.getElementById('increaseSize');
+        
+        // Функция для обновления статистики массива
+        function updateArrayStats() {
+            const size = array.length;
+            currentSizeElement.textContent = size;
+            currentArrayValues.textContent = array.join(', ');
+            
+            if (size > 0) {
+                const min = Math.min(...array);
+                const max = Math.max(...array);
+                const sum = array.reduce((a, b) => a + b, 0);
+                
+                arrayMinElement.textContent = min;
+                arrayMaxElement.textContent = max;
+                arraySumElement.textContent = sum;
+            } else {
+                arrayMinElement.textContent = '-';
+                arrayMaxElement.textContent = '-';
+                arraySumElement.textContent = '0';
+            }
+        }
+        
+        // Функция для добавления одного числа
+        function addSingleNumber() {
+            const value = parseInt(singleNumberInput.value);
+            if (isNaN(value) || value < 1 || value > 999) {
+                alert('Пожалуйста, введите число от 1 до 999');
+                singleNumberInput.focus();
+                return;
+            }
+            
+            // Сброс состояния сортировки при изменении массива
+            resetSortingState();
+            
+            array.push(value);
+            updateArrayStats();
+            renderArray();
+            
+            sortInfo.textContent = `Добавлено число ${value}. Массив: [${array.join(', ')}]`;
+            sortInfo.style.color = '#3498db';
+            
+            // Очистка поля ввода
+            singleNumberInput.value = '';
+            singleNumberInput.focus();
+        }
+        
+        // Функция для добавления нескольких чисел
+        function addMultipleNumbers() {
+            const input = multipleNumbersInput.value.trim();
+            if (!input) {
+                alert('Введите числа через пробел');
+                multipleNumbersInput.focus();
+                return;
+            }
+            
+            // Разбиваем строку на числа
+            const numbers = input.split(/\s+/).map(num => parseInt(num));
+            
+            // Проверяем все числа
+            for (let num of numbers) {
+                if (isNaN(num) || num < 1 || num > 999) {
+                    alert(`Число "${num}" недопустимо. Вводите числа от 1 до 999 через пробел`);
+                    multipleNumbersInput.focus();
+                    return;
+                }
+            }
+            
+            // Сброс состояния сортировки при изменении массива
+            resetSortingState();
+            
+            array.push(...numbers);
+            updateArrayStats();
+            renderArray();
+            
+            sortInfo.textContent = `Добавлено ${numbers.length} чисел. Массив: [${array.join(', ')}]`;
+            sortInfo.style.color = '#3498db';
+            
+            // Очистка поля ввода
+            multipleNumbersInput.value = '';
+            multipleNumbersInput.focus();
+        }
+        
+        // Функция для очистки массива
+        function clearArray() {
+            if (array.length === 0) {
+                sortInfo.textContent = 'Массив уже пуст';
+                sortInfo.style.color = '#7f8c8d';
+                return;
+            }
+            
+            if (confirm(`Очистить массив из ${array.length} элементов?`)) {
+                array = [];
+                resetSortingState();
+                updateArrayStats();
+                renderArray();
+                
+                sortInfo.textContent = 'Массив очищен. Введите новые числа';
+                sortInfo.style.color = '#e74c3c';
+            }
+        }
+        
+        // Функция для генерации случайного массива
+        function generateRandomArray() {
+            resetSortingState();
+            array = [];
+            
+            // Генерируем уникальные значения для наглядности
+            let usedValues = new Set();
+            for (let i = 0; i < arraySize; i++) {
+                let value;
+                do {
+                    value = Math.floor(Math.random() * 90) + 10; // Числа от 10 до 100
+                } while (usedValues.has(value) && usedValues.size < 80);
+                usedValues.add(value);
+                array.push(value);
+            }
+            
+            updateArrayStats();
+            renderArray();
+            
+            sortInfo.textContent = `Сгенерирован случайный массив из ${arraySize} элементов`;
+            sortInfo.style.color = '#9b59b6';
+        }
+        
+        // Функция для изменения размера массива
+        function updateArraySize(newSize) {
+            arraySize = Math.max(3, Math.min(20, newSize)); // Ограничиваем от 3 до 20
+            arraySizeValue.textContent = arraySize;
+            arraySizeSlider.value = arraySize;
+            
+            // Обновляем информацию о размере
+            currentSizeElement.textContent = array.length;
+        }
+        
+        // Функция для сброса состояния сортировки (без сброса массива)
+        function resetSortingState() {
+            stopSorting();
+            arrayState = {
+                sorted: false,
+                currentStep: 0,
+                i: 0,
+                j: 0,
+                comparisons: 0,
+                swaps: 0,
+                totalSteps: 0,
+                isRunning: false,
+                intervalId: null
+            };
+            comparisonsElement.textContent = '0';
+            swapsElement.textContent = '0';
+        }
+        
+        // Отрисовка массива
+        function renderArray() {
+            arrayVisualization.innerHTML = '';
+            
+            if (array.length === 0) {
+                const emptyMessage = document.createElement('div');
+                emptyMessage.style.textAlign = 'center';
+                emptyMessage.style.padding = '50px';
+                emptyMessage.style.color = '#7f8c8d';
+                emptyMessage.innerHTML = `
+                    <div style="font-size: 48px; margin-bottom: 20px;">📊</div>
+                    <h3 style="margin-bottom: 10px;">Массив пуст</h3>
+                    <p>Введите числа чтобы начать сортировку</p>
+                `;
+                arrayVisualization.appendChild(emptyMessage);
+                return;
+            }
+            
+            const maxValue = Math.max(...array);
+            const containerWidth = arrayVisualization.clientWidth;
+            
+            // Рассчитываем максимальную ширину элемента в зависимости от количества элементов
+            const maxElementWidth = Math.min(60, (containerWidth - (array.length * 8)) / array.length);
+            
+            array.forEach((value, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                
+                // Рассчитываем высоту элемента
+                const heightPercentage = (value / maxValue) * 0.8 + 0.2; // От 20% до 100%
+                element.style.height = `${heightPercentage * 120}px`;
+                element.style.width = `${maxElementWidth}px`;
+                
+                // Подсветка активных элементов
+                if (arrayState.sorted) {
+                    element.classList.add('sorted');
+                } else if (index === arrayState.j && arrayState.isRunning) {
+                    element.classList.add('active');
+                } else if (index === arrayState.j + 1 && arrayState.isRunning) {
+                    element.classList.add('compared');
+                }
+                
+                const valueLabel = document.createElement('div');
+                valueLabel.className = 'array-value';
+                valueLabel.textContent = value;
+                
+                element.appendChild(valueLabel);
+                arrayVisualization.appendChild(element);
+            });
+        }
+        
+        // Один шаг пузырьковой сортировки
+        function bubbleSortStep() {
+            if (arrayState.sorted) {
+                sortInfo.textContent = '✅ Сортировка завершена!';
+                sortInfo.style.color = '#2ecc71';
+                stopSorting();
+                return;
+            }
+            
+            const n = array.length;
+            
+            // Внешний цикл
+            if (arrayState.i < n - 1) {
+                // Внутренний цикл
+                if (arrayState.j < n - arrayState.i - 1) {
+                    // Подсветка сравниваемых элементов
+                    arrayState.comparisons++;
+                    comparisonsElement.textContent = arrayState.comparisons;
+                    
+                    sortInfo.textContent = `Сравниваем элементы [${arrayState.j}] = ${array[arrayState.j]} и [${arrayState.j+1}] = ${array[arrayState.j+1]}`;
+                    sortInfo.style.color = '#3498db';
+                    
+                    // Если текущий элемент больше следующего
+                    if (array[arrayState.j] > array[arrayState.j + 1]) {
+                        // Меняем местами
+                        [array[arrayState.j], array[arrayState.j + 1]] = [array[arrayState.j + 1], array[arrayState.j]];
+                        arrayState.swaps++;
+                        swapsElement.textContent = arrayState.swaps;
+                        sortInfo.textContent += ` → Меняем местами!`;
+                        sortInfo.style.color = '#f39c12';
+                    }
+                    
+                    arrayState.j++;
+                    arrayState.totalSteps++;
+                } else {
+                    // Переход к следующей итерации внешнего цикла
+                    arrayState.i++;
+                    arrayState.j = 0;
+                    sortInfo.textContent = `Завершили проход ${arrayState.i}. Начинаем проход ${arrayState.i + 1}`;
+                    sortInfo.style.color = '#9b59b6';
+                    
+                    // Проверка на завершение сортировки
+                    if (arrayState.i >= n - 1) {
+                        arrayState.sorted = true;
+                        sortInfo.textContent = '✅ Сортировка завершена! Массив отсортирован.';
+                        sortInfo.style.color = '#2ecc71';
+                    }
+                }
+            }
+            
+            renderArray();
+            updateArrayStats();
+        }
+        
+        // Запуск автоматической сортировки
+        function startSorting() {
+            if (array.length === 0) {
+                alert('Сначала добавьте числа в массив');
+                return;
+            }
+            
+            if (arrayState.isRunning || arrayState.sorted) return;
+            
+            arrayState.isRunning = true;
+            const speed = parseInt(document.getElementById('speedSort').value);
+            
+            arrayState.intervalId = setInterval(() => {
+                bubbleSortStep();
+            }, speed);
+            
+            sortInfo.textContent = '🚀 Сортировка запущена...';
+            sortInfo.style.color = '#9b59b6';
+        }
+        
+        // Остановка сортировки
+        function stopSorting() {
+            if (arrayState.intervalId) {
+                clearInterval(arrayState.intervalId);
+                arrayState.intervalId = null;
+            }
+            arrayState.isRunning = false;
+        }
+        
+        // Сброс состояния сортировки (полный сброс)
+        function resetSorting() {
+            stopSorting();
+            resetSortingState();
+            
+            if (array.length > 0) {
+                renderArray();
+                sortInfo.textContent = 'Сортировка сброшена. Массив восстановлен в исходное состояние';
+                sortInfo.style.color = '#7f8c8d';
+            } else {
+                sortInfo.textContent = 'Введите числа в массив чтобы начать сортировку';
+                sortInfo.style.color = '#7f8c8d';
+            }
+        }
+        
+        // ========== МОДЕЛЬ ДЕРЕВА С РУЧНЫМ ПОСТРОЕНИЕМ ==========
+        class TreeNode {
+            constructor(value, x, y, level, id) {
+                this.value = value;
+                this.left = null;
+                this.right = null;
+                this.x = x;
+                this.y = y;
+                this.level = level;
+                this.id = id;
+                this.parent = null;
+                this.selected = false;
+            }
+        }
+        
+        let tree = null;
+        let selectedNode = null;
+        let nodeCounter = 0;
+        let traversalState = {
+            visited: [],
+            order: [],
+            currentStep: 0,
+            isRunning: false,
+            intervalId: null,
+            traversalStack: []
+        };
+        
+        // Элементы DOM для дерева
+        const treeVisualization = document.getElementById('treeVisualization');
+        const traversalInfo = document.getElementById('traversalInfo');
+        const traversalOrderElement = document.getElementById('traversalOrder');
+        const selectedNodeValue = document.getElementById('selectedNodeValue');
+        const totalNodesElement = document.getElementById('totalNodes');
+        const treeDepthElement = document.getElementById('treeDepth');
+        const visitedNodesElement = document.getElementById('visitedNodes');
+        const totalNodesInfoElement = document.getElementById('totalNodesInfo');
+        
+        // Элементы управления деревом
+        const nodeValueInput = document.getElementById('nodeValue');
+        const childValueInput = document.getElementById('childValue');
+        const addRootBtn = document.getElementById('addRoot');
+        const addLeftChildBtn = document.getElementById('addLeftChild');
+        const addRightChildBtn = document.getElementById('addRightChild');
+        const removeNodeBtn = document.getElementById('removeNode');
+        const clearTreeBtn = document.getElementById('clearTree');
+        const randomTreeBtn = document.getElementById('randomTree');
+        const speedTraversalSelect = document.getElementById('speedTraversal');
+        
+        // Функция для подсчета узлов в дереве
+        function countNodes(node) {
+            if (!node) return 0;
+            return 1 + countNodes(node.left) + countNodes(node.right);
+        }
+        
+        // Функция для вычисления глубины дерева
+        function calculateTreeDepth(node) {
+            if (!node) return 0;
+            return 1 + Math.max(calculateTreeDepth(node.left), calculateTreeDepth(node.right));
+        }
+        
+        // Функция для обновления статистики дерева
+        function updateTreeStats() {
+            const nodeCount = tree ? countNodes(tree) : 0;
+            const depth = tree ? calculateTreeDepth(tree) : 0;
+            
+            totalNodesElement.textContent = nodeCount;
+            treeDepthElement.textContent = depth;
+            totalNodesInfoElement.textContent = nodeCount;
+            
+            // Обновляем состояние кнопок
+            updateButtonStates();
+        }
+        
+        // Функция для обновления состояния кнопок
+        function updateButtonStates() {
+            const hasTree = tree !== null;
+            const hasSelection = selectedNode !== null;
+            
+            // Кнопки, требующие выбранного узла
+            addLeftChildBtn.disabled = !hasSelection;
+            addRightChildBtn.disabled = !hasSelection;
+            removeNodeBtn.disabled = !hasSelection;
+            
+            // Кнопка создания корня всегда активна
+            addRootBtn.disabled = false;
+            
+            // Если у выбранного узла уже есть левый потомок
+            if (selectedNode && selectedNode.left) {
+                addLeftChildBtn.disabled = true;
+                addLeftChildBtn.title = 'Левый потомок уже существует';
+            } else if (selectedNode) {
+                addLeftChildBtn.title = 'Добавить левого потомка';
+            }
+            
+            // Если у выбранного узла уже есть правый потомок
+            if (selectedNode && selectedNode.right) {
+                addRightChildBtn.disabled = true;
+                addRightChildBtn.title = 'Правый потомок уже существует';
+            } else if (selectedNode) {
+                addRightChildBtn.title = 'Добавить правого потомка';
+            }
+            
+            // Если выбран корень
+            if (selectedNode && selectedNode === tree) {
+                removeNodeBtn.title = 'Удаление корня удалит всё дерево';
+            } else if (selectedNode) {
+                removeNodeBtn.title = 'Удалить выбранный узел';
+            }
+        }
+        
+        // Функция для выбора узла
+        function selectNode(node) {
+            // Снимаем выделение с предыдущего узла
+            if (selectedNode) {
+                selectedNode.selected = false;
+            }
+            
+            // Выбираем новый узел
+            selectedNode = node;
+            if (node) {
+                node.selected = true;
+                selectedNodeValue.textContent = node.value;
+                selectedNodeValue.style.color = '#e74c3c';
+            } else {
+                selectedNodeValue.textContent = '-';
+                selectedNodeValue.style.color = '#fff';
+            }
+            
+            updateButtonStates();
+            renderTree();
+        }
+        
+        // Функция для добавления корня
+        function addRoot() {
+            const value = parseInt(nodeValueInput.value);
+            if (isNaN(value) || value < 1 || value > 99) {
+                alert('Пожалуйста, введите значение от 1 до 99');
+                nodeValueInput.focus();
+                return;
+            }
+            
+            const containerWidth = treeVisualization.clientWidth;
+            
+            nodeCounter++;
+            tree = new TreeNode(value, containerWidth / 2, 80, 1, nodeCounter);
+            selectNode(tree);
+            updateTreeStats();
+            renderTree();
+            
+            traversalInfo.textContent = `Создан корень дерева со значением ${value}. Выберите узел для добавления потомков.`;
+            traversalInfo.style.color = '#2ecc71';
+        }
+        
+        // Функция для добавления левого потомка
+        function addLeftChild() {
+            if (!selectedNode) {
+                alert('Сначала выберите узел, кликнув по нему');
+                return;
+            }
+            
+            if (selectedNode.left) {
+                alert('У этого узла уже есть левый потомок');
+                return;
+            }
+            
+            const value = parseInt(childValueInput.value);
+            if (isNaN(value) || value < 1 || value > 99) {
+                alert('Пожалуйста, введите значение от 1 до 99');
+                childValueInput.focus();
+                return;
+            }
+            
+            // Рассчитываем смещение в зависимости от уровня
+            const xOffset = 180 / Math.pow(1.4, selectedNode.level);
+            nodeCounter++;
+            
+            selectedNode.left = new TreeNode(
+                value,
+                selectedNode.x - xOffset,
+                selectedNode.y + 100,
+                selectedNode.level + 1,
+                nodeCounter
+            );
+            selectedNode.left.parent = selectedNode;
+            
+            updateTreeStats();
+            renderTree();
+            
+            traversalInfo.textContent = `Добавлен левый потомок ${value} к узлу ${selectedNode.value}`;
+            traversalInfo.style.color = '#3498db';
+        }
+        
+        // Функция для добавления правого потомка
+        function addRightChild() {
+            if (!selectedNode) {
+                alert('Сначала выберите узел, кликнув по нему');
+                return;
+            }
+            
+            if (selectedNode.right) {
+                alert('У этого узла уже есть правый потомок');
+                return;
+            }
+            
+            const value = parseInt(childValueInput.value);
+            if (isNaN(value) || value < 1 || value > 99) {
+                alert('Пожалуйста, введите значение от 1 до 99');
+                childValueInput.focus();
+                return;
+            }
+            
+            // Рассчитываем смещение в зависимости от уровня
+            const xOffset = 180 / Math.pow(1.4, selectedNode.level);
+            nodeCounter++;
+            
+            selectedNode.right = new TreeNode(
+                value,
+                selectedNode.x + xOffset,
+                selectedNode.y + 100,
+                selectedNode.level + 1,
+                nodeCounter
+            );
+            selectedNode.right.parent = selectedNode;
+            
+            updateTreeStats();
+            renderTree();
+            
+            traversalInfo.textContent = `Добавлен правый потомок ${value} к узлу ${selectedNode.value}`;
+            traversalInfo.style.color = '#3498db';
+        }
+        
+        // Функция для удаления узла
+        function removeNode() {
+            if (!selectedNode) {
+                alert('Сначала выберите узел для удаления');
+                return;
+            }
+            
+            if (selectedNode === tree) {
+                // Если удаляем корень, очищаем все дерево
+                if (confirm('Удаление корня удалит всё дерево. Продолжить?')) {
+                    clearTree();
+                }
+                return;
+            }
+            
+            // Находим родителя и удаляем ссылку на этот узел
+            if (selectedNode.parent) {
+                if (selectedNode.parent.left === selectedNode) {
+                    selectedNode.parent.left = null;
+                } else if (selectedNode.parent.right === selectedNode) {
+                    selectedNode.parent.right = null;
+                }
+            }
+            
+            // Выбираем родителя после удаления
+            const parent = selectedNode.parent;
+            selectNode(parent);
+            
+            updateTreeStats();
+            renderTree();
+            
+            traversalInfo.textContent = 'Узел удален';
+            traversalInfo.style.color = '#e74c3c';
+        }
+        
+        // Функция для очистки дерева
+        function clearTree() {
+            tree = null;
+            selectedNode = null;
+            nodeCounter = 0;
+            resetTraversal();
+            updateTreeStats();
+            renderTree();
+            
+            traversalInfo.textContent = 'Дерево очищено. Создайте новое дерево';
+            traversalInfo.style.color = '#7f8c8d';
+        }
+        
+        // Генерация случайного бинарного дерева
+        function generateRandomTree() {
+            clearTree();
+            
+            // Получаем размеры контейнера
+            const containerWidth = treeVisualization.clientWidth;
+            
+            // Создаем корень дерева
+            const rootValue = Math.floor(Math.random() * 90) + 10;
+            nodeCounter++;
+            tree = new TreeNode(rootValue, containerWidth / 2, 80, 1, nodeCounter);
+            
+            // Случайно добавляем узлы (от 3 до 7 узлов)
+            const targetNodeCount = Math.floor(Math.random() * 5) + 3;
+            let nodes = [tree];
+            
+            while (nodeCounter < targetNodeCount && nodes.length > 0) {
+                // Выбираем случайный узел из доступных
+                const randomIndex = Math.floor(Math.random() * nodes.length);
+                const currentNode = nodes[randomIndex];
+                
+                // Решаем, добавлять ли потомка
+                if (Math.random() > 0.5 && !currentNode.left) {
+                    const value = Math.floor(Math.random() * 90) + 10;
+                    const xOffset = 180 / Math.pow(1.4, currentNode.level);
+                    nodeCounter++;
+                    
+                    currentNode.left = new TreeNode(
+                        value,
+                        currentNode.x - xOffset,
+                        currentNode.y + 100,
+                        currentNode.level + 1,
+                        nodeCounter
+                    );
+                    currentNode.left.parent = currentNode;
+                    nodes.push(currentNode.left);
+                }
+                
+                if (nodeCounter >= targetNodeCount) break;
+                
+                if (Math.random() > 0.5 && !currentNode.right) {
+                    const value = Math.floor(Math.random() * 90) + 10;
+                    const xOffset = 180 / Math.pow(1.4, currentNode.level);
+                    nodeCounter++;
+                    
+                    currentNode.right = new TreeNode(
+                        value,
+                        currentNode.x + xOffset,
+                        currentNode.y + 100,
+                        currentNode.level + 1,
+                        nodeCounter
+                    );
+                    currentNode.right.parent = currentNode;
+                    nodes.push(currentNode.right);
+                }
+                
+                // Удаляем узел, если у него уже два потомка
+                if (currentNode.left && currentNode.right) {
+                    nodes.splice(randomIndex, 1);
+                }
+            }
+            
+            selectNode(tree);
+            updateTreeStats();
+            renderTree();
+            
+            traversalInfo.textContent = `Сгенерировано случайное дерево из ${nodeCounter} узлов. Выберите тип обхода и нажмите "Запустить обход"`;
+            traversalInfo.style.color = '#9b59b6';
+        }
+        
+        // Отрисовка дерева
+        function renderTree(activeNode = null) {
+            treeVisualization.innerHTML = '';
+            
+            if (!tree) {
+                // Показываем сообщение, если дерево пустое
+                const emptyMessage = document.createElement('div');
+                emptyMessage.style.textAlign = 'center';
+                emptyMessage.style.padding = '100px 20px';
+                emptyMessage.style.color = '#7f8c8d';
+                emptyMessage.innerHTML = `
+                    <div style="font-size: 48px; margin-bottom: 20px;">🌳</div>
+                    <h3 style="margin-bottom: 10px;">Дерево пустое</h3>
+                    <p>Введите значение и нажмите "Создать корень"</p>
+                    <p style="font-size: 12px; margin-top: 20px;">Или сгенерируйте случайное дерево</p>
+                `;
+                treeVisualization.appendChild(emptyMessage);
+                return;
+            }
+            
+            const treeContainer = document.createElement('div');
+            treeContainer.className = 'tree';
+            
+            // Находим границы дерева для центрирования
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            
+            function calculateBounds(node) {
+                if (!node) return;
+                
+                minX = Math.min(minX, node.x);
+                maxX = Math.max(maxX, node.x);
+                minY = Math.min(minY, node.y);
+                maxY = Math.max(maxY, node.y);
+                
+                calculateBounds(node.left);
+                calculateBounds(node.right);
+            }
+            
+            calculateBounds(tree);
+            
+            // Центрируем дерево
+            const treeWidth = maxX - minX;
+            const treeHeight = maxY - minY;
+            const centerX = (treeVisualization.clientWidth - treeWidth) / 2 - minX;
+            const centerY = 50; // Отступ сверху
+            
+            // Сначала рисуем линии
+            function drawLines(node) {
+                if (!node) return;
+                
+                // Линия к левому потомку
+                if (node.left) {
+                    const line = document.createElement('div');
+                    line.className = 'tree-line';
+                    
+                    const startX = node.x + centerX;
+                    const startY = node.y + centerY;
+                    const endX = node.left.x + centerX;
+                    const endY = node.left.y + centerY;
+                    
+                    const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                    const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+                    
+                    line.style.width = `${length}px`;
+                    line.style.left = `${startX}px`;
+                    line.style.top = `${startY}px`;
+                    line.style.transform = `rotate(${angle}deg)`;
+                    
+                    treeContainer.appendChild(line);
+                    drawLines(node.left);
+                }
+                
+                // Линия к правому потомку
+                if (node.right) {
+                    const line = document.createElement('div');
+                    line.className = 'tree-line';
+                    
+                    const startX = node.x + centerX;
+                    const startY = node.y + centerY;
+                    const endX = node.right.x + centerX;
+                    const endY = node.right.y + centerY;
+                    
+                    const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                    const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+                    
+                    line.style.width = `${length}px`;
+                    line.style.left = `${startX}px`;
+                    line.style.top = `${startY}px`;
+                    line.style.transform = `rotate(${angle}deg)`;
+                    
+                    treeContainer.appendChild(line);
+                    drawLines(node.right);
+                }
+            }
+            
+            // Затем рисуем узлы
+            function drawNodes(node) {
+                if (!node) return;
+                
+                const nodeElement = document.createElement('div');
+                nodeElement.className = 'tree-node';
+                
+                // Определяем классы для узла
+                if (node === tree) {
+                    nodeElement.classList.add('root');
+                }
+                if (node === selectedNode) {
+                    nodeElement.classList.add('selected');
+                }
+                if (traversalState.visited.includes(node)) {
+                    nodeElement.classList.add('visited');
+                }
+                if (node === activeNode) {
+                    nodeElement.classList.add('active');
+                }
+                
+                // Применяем центрирование
+                const displayX = node.x + centerX - 25; // 25 = половина ширины узла
+                const displayY = node.y + centerY - 25; // 25 = половина высоты узла
+                
+                nodeElement.style.left = `${displayX}px`;
+                nodeElement.style.top = `${displayY}px`;
+                nodeElement.textContent = node.value;
+                nodeElement.dataset.nodeId = node.id;
+                
+                // Добавляем обработчик клика
+                nodeElement.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectNode(node);
+                });
+                
+                treeContainer.appendChild(nodeElement);
+                
+                // Рекурсивно рисуем потомков
+                drawNodes(node.left);
+                drawNodes(node.right);
+            }
+            
+            drawLines(tree);
+            drawNodes(tree);
+            treeVisualization.appendChild(treeContainer);
+        }
+        
+        // Обход дерева в глубину (рекурсивный)
+        function* dfsTraversal(node, type = 'preorder') {
+            if (!node) return;
+            
+            if (type === 'preorder') {
+                yield node; // Посетить узел
+                if (node.left) yield* dfsTraversal(node.left, type);
+                if (node.right) yield* dfsTraversal(node.right, type);
+            } else if (type === 'inorder') {
+                if (node.left) yield* dfsTraversal(node.left, type);
+                yield node; // Посетить узел
+                if (node.right) yield* dfsTraversal(node.right, type);
+            } else if (type === 'postorder') {
+                if (node.left) yield* dfsTraversal(node.left, type);
+                if (node.right) yield* dfsTraversal(node.right, type);
+                yield node; // Посетить узел
+            }
+        }
+        
+        // Один шаг обхода дерева
+        function traversalStep() {
+            if (!traversalState.traversalStack || traversalState.currentStep >= traversalState.traversalStack.length) {
+                traversalInfo.textContent = '✅ Обход дерева завершен!';
+                traversalInfo.style.color = '#2ecc71';
+                stopTraversal();
+                return;
+            }
+            
+            const currentNode = traversalState.traversalStack[traversalState.currentStep];
+            traversalState.visited.push(currentNode);
+            traversalState.order.push(currentNode.value);
+            
+            // Обновляем информацию
+            const stepNumber = traversalState.currentStep + 1;
+            const totalSteps = traversalState.traversalStack.length;
+            visitedNodesElement.textContent = stepNumber;
+            
+            traversalInfo.textContent = `Шаг ${stepNumber}/${totalSteps}: Посещаем узел ${currentNode.value}`;
+            traversalInfo.style.color = '#3498db';
+            
+            traversalOrderElement.textContent = traversalState.order.join(' → ');
+            
+            // Отрисовываем дерево с подсветкой
+            renderTree(currentNode);
+            
+            traversalState.currentStep++;
+        }
+        
+        // Запуск автоматического обхода
+        function startTraversal() {
+            if (!tree) {
+                alert('Сначала создайте дерево');
+                return;
+            }
+            
+            if (traversalState.isRunning) return;
+            
+            // Получаем тип обхода
+            const type = document.getElementById('traversalType').value;
+            const typeNames = {
+                'preorder': 'Прямой обход (Pre-order)',
+                'inorder': 'Центральный обход (In-order)',
+                'postorder': 'Обратный обход (Post-order)'
+            };
+            
+            // Создаем генератор для обхода
+            const traversalGenerator = dfsTraversal(tree, type);
+            
+            // Преобразуем генератор в массив для пошагового выполнения
+            traversalState.traversalStack = [...traversalGenerator];
+            traversalState.currentStep = 0;
+            traversalState.visited = [];
+            traversalState.order = [];
+            traversalOrderElement.textContent = '';
+            visitedNodesElement.textContent = '0';
+            
+            traversalState.isRunning = true;
+            
+            // Запускаем с интервалом
+            const speed = parseInt(speedTraversalSelect.value);
+            traversalState.intervalId = setInterval(() => {
+                traversalStep();
+            }, speed);
+            
+            traversalInfo.textContent = `🚀 Запущен ${typeNames[type]}...`;
+            traversalInfo.style.color = '#9b59b6';
+        }
+        
+        // Остановка обхода
+        function stopTraversal() {
+            if (traversalState.intervalId) {
+                clearInterval(traversalState.intervalId);
+                traversalState.intervalId = null;
+            }
+            traversalState.isRunning = false;
+        }
+        
+        // Сброс состояния обхода
+        function resetTraversal() {
+            stopTraversal();
+            traversalState = {
+                visited: [],
+                order: [],
+                currentStep: 0,
+                isRunning: false,
+                intervalId: null,
+                traversalStack: []
+            };
+            traversalOrderElement.textContent = '';
+            visitedNodesElement.textContent = '0';
+            
+            if (tree) {
+                renderTree();
+                traversalInfo.textContent = 'Обход сброшен. Вы можете создать новое дерево или запустить обход снова';
+                traversalInfo.style.color = '#7f8c8d';
+            }
+        }
+        
+        // ========== ИНИЦИАЛИЗАЦИЯ ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация управления массивом
+            addNumberBtn.addEventListener('click', addSingleNumber);
+            addMultipleBtn.addEventListener('click', addMultipleNumbers);
+            clearArrayBtn.addEventListener('click', clearArray);
+            generateRandomBtn.addEventListener('click', generateRandomArray);
+            
+            // Обработка Enter в полях ввода массива
+            singleNumberInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addSingleNumber();
+            });
+            
+            multipleNumbersInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addMultipleNumbers();
+            });
+            
+            // Инициализация элементов управления размером массива
+            decreaseSizeBtn.addEventListener('click', () => {
+                updateArraySize(arraySize - 1);
+            });
+            
+            increaseSizeBtn.addEventListener('click', () => {
+                updateArraySize(arraySize + 1);
+            });
+            
+            arraySizeSlider.addEventListener('input', function() {
+                updateArraySize(parseInt(this.value));
+            });
+            
+            // Инициализация сортировки
+            document.getElementById('startSort').addEventListener('click', startSorting);
+            document.getElementById('nextStepSort').addEventListener('click', () => {
+                stopSorting();
+                bubbleSortStep();
+            });
+            document.getElementById('resetSort').addEventListener('click', resetSorting);
+            
+            // Инициализация конструктора дерева
+            addRootBtn.addEventListener('click', addRoot);
+            addLeftChildBtn.addEventListener('click', addLeftChild);
+            addRightChildBtn.addEventListener('click', addRightChild);
+            removeNodeBtn.addEventListener('click', removeNode);
+            clearTreeBtn.addEventListener('click', clearTree);
+            randomTreeBtn.addEventListener('click', generateRandomTree);
+            
+            // Инициализация обхода дерева
+            document.getElementById('startTraversal').addEventListener('click', startTraversal);
+            document.getElementById('nextStepTraversal').addEventListener('click', () => {
+                stopTraversal();
+                traversalStep();
+            });
+            document.getElementById('resetTraversal').addEventListener('click', resetTraversal);
+            
+            // Инициализация статистики
+            updateArrayStats();
+            updateTreeStats();
+            
+            // Обработка нажатия Enter в полях ввода дерева
+            nodeValueInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addRoot();
+            });
+            
+            childValueInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    if (!addLeftChildBtn.disabled) addLeftChild();
+                    else if (!addRightChildBtn.disabled) addRightChild();
+                }
+            });
+            
+            // Перерисовываем при изменении размера окна
+            window.addEventListener('resize', function() {
+                if (tree) {
+                    renderTree();
+                }
+                if (array.length > 0) {
+                    renderArray();
+                }
+            });
+            
+            // Начальное сообщение
+            sortInfo.textContent = 'Введите числа в массив или сгенерируйте случайный';
+            traversalInfo.textContent = 'Создайте дерево или сгенерируйте случайное';
+        });
+    </script>
+</body>
+</html>
